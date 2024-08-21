@@ -41,6 +41,12 @@ public class SanPhamChiTietServiceIplm implements SanPhamChiTietService {
                 .build();
     }
 
+    @Override
+    public List<SanPhamChiTietDTO> getBySpId(Long sanPhamId) {
+        List<SanPhamChiTiet> list = sanPhamChiTietRepo.findBySanPhamId(sanPhamId);
+        return mapToListDTO(list);
+    }
+
     private List<SanPhamChiTietDTO> mapToListDTO(List<SanPhamChiTiet> entities){
         List<SanPhamChiTietDTO> listDTOs = new ArrayList<>();
         for(SanPhamChiTiet entity : entities){
@@ -51,6 +57,7 @@ public class SanPhamChiTietServiceIplm implements SanPhamChiTietService {
     }
     @Override
     public SanPhamChiTietDTO getById(Long id) {
+
         return null;
     }
 
@@ -69,11 +76,28 @@ public class SanPhamChiTietServiceIplm implements SanPhamChiTietService {
 
     @Override
     public void update(SanPhamChiTietDTO dto, Long id) {
-
+        SanPhamChiTiet entity = sanPhamChiTietRepo.findById(id)
+                .orElseThrow(() -> new CustomExceptionHandle("Chi tiet san pham khong ton tai"));
+        SanPham sanPham = entity.getSanPham();
+        entity.setTen(sanPham.getTen());
+        sanPham.setGia(sanPham.getGia() > entity.getGia() ? entity.getGia() : sanPham.getGia());
+        sanPham.setSoLuongTonKho(sanPham.getSoLuongTonKho() + entity.getSoLuongTonKho());
+        sanPhamRepo.save(sanPham);
+        sanPhamChiTietRepo.save(entity);
     }
 
     @Override
     public void delete(Long id) {
+        // nếu sản phẩm chi tiết id này là sản phẩm chi tiêt cuối cùng của sản phẩm thì sẽ set lại trạng thái của sản phẩm
+        SanPhamChiTiet sanPhamChiTiet = sanPhamChiTietRepo.findById(id)
+                .orElseThrow(() -> new CustomExceptionHandle("Chi tiet san pham khong ton tai"));
 
+        List<SanPhamChiTiet> list = sanPhamChiTietRepo.findBySanPhamId(sanPhamChiTiet.getSanPham().getId());
+        if(list.size() == 1){
+            SanPham sanPham = sanPhamChiTiet.getSanPham();
+            sanPham.setTrangThai(0);
+            sanPhamRepo.save(sanPham);
+        }
+        sanPhamChiTietRepo.deleteById(id);
     }
 }

@@ -5,6 +5,7 @@ import com.duyhk.apiwebbh.dto.SanPhamChiTietDTO;
 import com.duyhk.apiwebbh.service.SanPhamChiTietService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,11 @@ public class SanPhamChiTietController {
         return sanPhamChiTietService.getAll(page, size);
     }
 
+    @GetMapping("/getBySpId")
+    public List<SanPhamChiTietDTO> getBySpId(@RequestParam Long spId){
+        return sanPhamChiTietService.getBySpId(spId);
+    }
+
     @PostMapping
     public ResponseDTO<Void> create(@RequestBody @Valid SanPhamChiTietDTO sanPhamChiTietDTO){
         sanPhamChiTietService.create(sanPhamChiTietDTO);
@@ -29,5 +35,11 @@ public class SanPhamChiTietController {
                 .message("Them san pham chi tiet thanh cong")
                 .status(201)
                 .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable("id") Long id){
+        sanPhamChiTietService.delete(id);
+        return ResponseEntity.ok("Xoa thanh cong");
     }
 }
