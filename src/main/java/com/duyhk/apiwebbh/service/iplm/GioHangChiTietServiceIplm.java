@@ -10,7 +10,11 @@ import com.duyhk.apiwebbh.repository.GioHangRepository;
 import com.duyhk.apiwebbh.repository.SanPhamChiTietRepository;
 import com.duyhk.apiwebbh.service.GioHangChiTietService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +22,13 @@ public class GioHangChiTietServiceIplm implements GioHangChiTietService {
     private final GioHangChiTietRepo gioHangChiTietRepo;
     private final GioHangRepository gioHangRepo;
     private final SanPhamChiTietRepository sanPhamChiTietRepo;
+
+    @Override
+    public List<GioHangChiTietDTO> getByGioHangId(Long gioHangId) {
+        return gioHangChiTietRepo.findByGioHangId(gioHangId)
+                .stream().map(x -> new ModelMapper().map(x, GioHangChiTietDTO.class)).collect(Collectors.toList());
+    }
+
     @Override
     public String themVaoGioHang(GioHangChiTietDTO dto) {
         GioHangChiTiet entity = new GioHangChiTiet();
@@ -27,12 +38,13 @@ public class GioHangChiTietServiceIplm implements GioHangChiTietService {
         SanPhamChiTiet sp = sanPhamChiTietRepo.findById(dto.getSanPhamChiTiet().getId())
                 .orElseThrow(() -> new CustomExceptionHandle("Khong tim thay sp"));
         entity.setSanPhamChiTiet(sp);
+        //
         GioHangChiTiet isExists = gioHangChiTietRepo.findByGioHangIdAndSanPhamChiTietId(dto.getGioHang().getId(), dto.getSanPhamChiTiet().getId())
                 .orElse(null);
-        if (isExists!= null) {
+        if (isExists != null) {
             entity.setId(isExists.getId());
             entity.setSoLuong(isExists.getSoLuong() + dto.getSoLuong());
-        }else{
+        } else {
             entity.setSoLuong(dto.getSoLuong());
             gioHang.setTongSoSanPham(gioHang.getTongSoSanPham() + 1);
             gioHangRepo.save(gioHang);
