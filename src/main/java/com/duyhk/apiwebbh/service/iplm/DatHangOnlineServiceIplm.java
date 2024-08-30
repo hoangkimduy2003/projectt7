@@ -1,12 +1,17 @@
 package com.duyhk.apiwebbh.service.iplm;
 
+import com.duyhk.apiwebbh.dto.HoaDonChiTietDTO;
+import com.duyhk.apiwebbh.dto.HoaDonDTO;
 import com.duyhk.apiwebbh.dto.ThongTinDatHangDTO;
+import com.duyhk.apiwebbh.dto.ThongTinHoaDonDTO;
 import com.duyhk.apiwebbh.entity.*;
 import com.duyhk.apiwebbh.exception.CustomExceptionHandle;
 import com.duyhk.apiwebbh.repository.*;
 import com.duyhk.apiwebbh.service.DatHangOnlineService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.ModelMap;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -23,6 +28,27 @@ public class DatHangOnlineServiceIplm implements DatHangOnlineService {
     private final SanPhamRepository sanPhamRepo;
     private final SanPhamChiTietRepository sanPhamChiTietRepo;
 
+
+    @Override
+    public ThongTinHoaDonDTO getById(Long hoaDonId) {
+        HoaDon hoaDon = hoaDonRepo.findById(hoaDonId).orElseThrow(() -> new RuntimeException("Hoa don khong ton tai"));
+        List<HoaDonChiTiet> hoaDonChiTietList = hoaDonChiTietRepo.findByHoaDonId(hoaDonId)
+                .orElseThrow(() -> new RuntimeException("Hoa don khong ton tai"));
+        ThongTinHoaDonDTO thongTinHoaDonDTO = new ThongTinHoaDonDTO();
+        mapToDto(hoaDon,hoaDonChiTietList,thongTinHoaDonDTO);
+        return thongTinHoaDonDTO;
+    }
+
+    private void mapToDto(HoaDon hoaDon, List<HoaDonChiTiet> hoaDonChiTietList, ThongTinHoaDonDTO thongTinHoaDonDTO) {
+        HoaDonDTO hoaDonDTO = new ModelMapper().map(hoaDon,HoaDonDTO.class);
+        thongTinHoaDonDTO.setThongTinHoaDon(hoaDonDTO);
+        List<HoaDonChiTietDTO> listHdctDto = new ArrayList<>();
+        for(HoaDonChiTiet hoaDonChiTiet: hoaDonChiTietList){
+            HoaDonChiTietDTO hdct = new ModelMapper().map(hoaDonChiTiet, HoaDonChiTietDTO.class);
+            listHdctDto.add(hdct);
+        }
+        thongTinHoaDonDTO.setHoaDonChiTietList(listHdctDto);
+    }
 
     @Override
     public String datHang(ThongTinDatHangDTO dto) {
@@ -76,7 +102,7 @@ public class DatHangOnlineServiceIplm implements DatHangOnlineService {
 
     @Override
     public String updateTrangThai(Long id, Integer trangThai) {
-        // 0 đã huy, 1 đang chờ, 2 là chờ lấy hàng, 3 đang giao hàng, 4 : Đã hoàn thaành
+        // 0 đã huy, 1 đang chờ, 2 là chờ lấy hàng, 3 đang giao hàng, 4: Đã hoàn thaành
         checkStatus(id,trangThai);
         return "Cap nhat thanh cong";
     }
@@ -88,6 +114,13 @@ public class DatHangOnlineServiceIplm implements DatHangOnlineService {
             hoaDon.setTrangThai(trangThai);
             if (trangThai == 4) {
                 hoaDon.setNgayHoanThanh(LocalDate.now());
+                TaiKhoan taiKhoan = hoaDon.getTaiKhoan();
+                taiKhoan.setTongHoaDon(taiKhoan.getTongHoaDon() + 1);
+                taiKhoan.setTongTien(taiKhoan.getTongTien() + hoaDon.getTongSoTien());
+                if(taiKhoan.getTongHoaDon() > 25 && taiKhoan.getTongTien() > 10000000){
+                    taiKhoan.setHangTaiKhoan(2);
+                }
+                taiKhoanRepo.save(taiKhoan);
             }
             hoaDonRepo.save(hoaDon);
         } else {

@@ -31,6 +31,14 @@ public class SanPhamServiceIplm implements SanPhamService {
         return ResponseEntity.ok(listDto);
     }
 
+    @Override
+    public ResponseEntity<List<SanPhamDTO>> filter(String ten, Long loaiSanPhamId) {
+        List<SanPham> entities = sanPhamRepo.filter(ten, loaiSanPhamId);
+        List<SanPhamDTO> listDto = new ArrayList<>();
+        mapToListDto(entities, listDto);
+        return ResponseEntity.ok(listDto);
+    }
+
     public void mapToListDto(List<SanPham> listEntities, List<SanPhamDTO> listDto) {
         for (SanPham entity : listEntities) {
             SanPhamDTO dto = new SanPhamDTO();

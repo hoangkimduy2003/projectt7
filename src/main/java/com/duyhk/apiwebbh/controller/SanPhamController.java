@@ -17,8 +17,14 @@ public class SanPhamController {
     private final SanPhamService sanPhamService;
 
     @GetMapping
-    public ResponseEntity<List<SanPhamDTO>> getAll(){
+    public ResponseEntity<List<SanPhamDTO>> getAll() {
         return sanPhamService.getAll();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SanPhamDTO>> filter(@RequestParam String ten,
+                                                   @RequestParam Long loaiSanPhamId) {
+        return sanPhamService.filter(ten, loaiSanPhamId);
     }
 
     @PostMapping
@@ -27,12 +33,12 @@ public class SanPhamController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> update(@RequestBody SanPhamDTO dto, @PathVariable("id")  Long id) throws IOException {
+    public ResponseEntity<String> update(@RequestBody SanPhamDTO dto, @PathVariable("id") Long id) throws IOException {
         return sanPhamService.update(dto, id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Long id){
+    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         return sanPhamService.delete(id);
     }
 }

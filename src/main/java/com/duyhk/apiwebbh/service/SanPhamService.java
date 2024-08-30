@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface SanPhamService {
     ResponseEntity<List<SanPhamDTO>> getAll();
-
+    ResponseEntity<List<SanPhamDTO>> filter(String ten, Long loaiSanPhamId);
     ResponseEntity<SanPhamDTO> getById(Long id);
 
     ResponseEntity<String> create(SanPhamDTO dto) throws IOException;
