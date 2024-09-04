@@ -21,7 +21,7 @@ public class SanPhamController {
         return sanPhamService.getAll();
     }
 
-    @GetMapping
+    @GetMapping("/filter")
     public ResponseEntity<List<SanPhamDTO>> filter(@RequestParam String ten,
                                                    @RequestParam Long loaiSanPhamId) {
         return sanPhamService.filter(ten, loaiSanPhamId);

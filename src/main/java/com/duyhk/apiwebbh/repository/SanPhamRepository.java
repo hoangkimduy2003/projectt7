@@ -16,6 +16,6 @@ public interface SanPhamRepository extends JpaRepository<SanPham, Long> {
     """)
     List<SanPham> filter(
             @Param("ten") String ten,
-            @Param("loaiSanPhamId") Long loaiSanPhamId
+            Long loaiSanPhamId
     );
 }

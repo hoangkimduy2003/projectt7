@@ -9,6 +9,7 @@ import com.duyhk.apiwebbh.repository.TaiKhoanRepository;
 import com.duyhk.apiwebbh.service.TaiKhoanService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +18,7 @@ public class TaiKhoanServiceIplm implements TaiKhoanService {
 
     private final TaiKhoanRepository taiKhoanRepo;
     private final GioHangRepository gioHangRepo;
+    private  final PasswordEncoder passwordEncoder;
     @Override
     public String dangNhap(TaiKhoanDTO taiKhoanDTO) {
 
@@ -32,6 +34,8 @@ public class TaiKhoanServiceIplm implements TaiKhoanService {
         taiKhoan.setTongTien(0l);
         taiKhoan.setTrangThai(1);
         taiKhoan.setHangTaiKhoan(1);
+        taiKhoan.setSoDienThoai(taiKhoanDTO.getSoDienThoai());
+        taiKhoan.setMatKhau(passwordEncoder.encode(taiKhoanDTO.getMatKhau()));
         taiKhoan = taiKhoanRepo.save(taiKhoan);
         GioHang gioHang = new GioHang();
         gioHang.setTongSoSanPham(0l);

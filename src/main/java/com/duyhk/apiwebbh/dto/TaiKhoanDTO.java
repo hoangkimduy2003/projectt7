@@ -12,6 +12,7 @@ public class TaiKhoanDTO {
     private Long id;
     private String ma;
     private String email;
+    private String soDienThoai;
     private String matKhau;
     private String hoVaTen;
     private Role role;

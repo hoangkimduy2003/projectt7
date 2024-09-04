@@ -22,6 +22,7 @@ import java.util.List;
 public class SanPhamServiceIplm implements SanPhamService {
     public final SanPhamRepository sanPhamRepo;
     public final LoaiSanPhamRepository loaiSanPhamRepo;
+    private final CloudinaryServiceImpl cloudinaryService;
 
     @Override
     public ResponseEntity<List<SanPhamDTO>> getAll() {
@@ -69,8 +70,7 @@ public class SanPhamServiceIplm implements SanPhamService {
     public ResponseEntity<String> create(SanPhamDTO dto) throws IOException {
         List<String> images;
         if (dto.getFiles() != null) {
-            images = processFiles(dto.getFiles());
-
+            images = processFilesSaveToCloud(dto.getFiles());
         } else {
             throw new RuntimeException("Vui long chon file");
         }
@@ -80,6 +80,23 @@ public class SanPhamServiceIplm implements SanPhamService {
         mapToEntitySave(sanPham, dto);
         sanPhamRepo.save(sanPham);
         return ResponseEntity.ok("Them thanh cong");
+    }
+
+    private List<String> processFilesSaveToCloud(List<MultipartFile> files) {
+        List<String> result = new ArrayList<>();
+        for (MultipartFile multipartFile : files) {
+            try {
+                String url = cloudinaryService.uploadFile(multipartFile, "images");
+                if (url == null) {
+                    throw new RuntimeException("Could not upload");
+                }
+                result.add(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return result;
     }
 
 
